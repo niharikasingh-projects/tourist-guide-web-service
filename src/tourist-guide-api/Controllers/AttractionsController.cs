@@ -83,5 +83,12 @@ namespace TouristGuide.Api.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("location/{location}")]
+        public async Task<IActionResult> GetByLocation(string location)
+        {
+            var attractions = await _attractionService.GetAttractionsByLocationAsync(location);
+            return Ok(attractions);
+        }
     }
 }

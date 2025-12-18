@@ -145,5 +145,25 @@ namespace TouristGuide.Api.Services
                 })
                 .ToListAsync();
         }
+
+        public async Task<IEnumerable<AttractionDto>> GetAttractionsByLocationAsync(string location)
+        {
+
+            return await _context.TouristAttractions
+                .Where(a => a.IsActive && (location.Contains(a.Location.ToLower()) || a.Location.ToLower() == location.ToLower()))
+                .Select(a => new AttractionDto
+                {
+                    Id = a.Id,
+                    Name = a.Name,
+                    Description = a.Description,
+                    Location = a.Location,
+                    ImageUrl = a.ImageUrl,
+                    Category = a.Category,
+                    Rating = a.Rating,
+                    EntryFee = a.EntryFee,
+                    IsActive = a.IsActive
+                })
+                .ToListAsync();
+        }
     }
 }

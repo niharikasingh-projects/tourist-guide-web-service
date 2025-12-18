@@ -39,6 +39,8 @@ namespace TouristGuide.Api.DTOs
     {
         public string Token { get; set; } = string.Empty;
         public UserDto User { get; set; } = null!;
+
+        public bool Success => !string.IsNullOrEmpty(Token);
     }
 
     public class UserDto

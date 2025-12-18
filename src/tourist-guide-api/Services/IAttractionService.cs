@@ -11,5 +11,7 @@ namespace TouristGuide.Api.Services
         Task<AttractionDto?> UpdateAttractionAsync(int id, UpdateAttractionDto dto);
         Task<bool> DeleteAttractionAsync(int id);
         Task<IEnumerable<AttractionDto>> SearchAttractionsAsync(string location);
+
+        Task<IEnumerable<AttractionDto>> GetAttractionsByLocationAsync(string location);
     }
 }

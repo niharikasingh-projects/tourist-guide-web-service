@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TouristGuide.Api.DTOs
 {
@@ -8,13 +9,19 @@ namespace TouristGuide.Api.DTOs
         public int UserId { get; set; }
         public int AttractionId { get; set; }
         public string AttractionName { get; set; } = string.Empty;
+
+        [JsonPropertyName("name")]
         public string FullName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public string PhoneNumber { get; set; } = string.Empty;
+
+        [JsonPropertyName("experienceYears")]
         public int Experience { get; set; }
         public string Languages { get; set; } = string.Empty;
         public string? Bio { get; set; }
         public decimal Rating { get; set; }
+
+        [JsonPropertyName("hourlyRate")]
         public decimal PricePerHour { get; set; }
         public string Availability { get; set; } = string.Empty;
         public string? ProfileImageUrl { get; set; }
@@ -51,6 +58,7 @@ namespace TouristGuide.Api.DTOs
         [Range(0, 5)]
         public decimal Rating { get; set; }
 
+        [JsonPropertyName("hourlyRate")]
         [Range(0, 10000)]
         public decimal PricePerHour { get; set; }
 

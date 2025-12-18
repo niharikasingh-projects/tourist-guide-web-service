@@ -1,8 +1,14 @@
+using System.ComponentModel;
+using System.Text.Json.Serialization;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+
 namespace TouristGuide.Api.DTOs
 {
     public class AttractionDto
     {
         public int Id { get; set; }
+
+        [JsonPropertyName("attractionName")]
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
@@ -15,6 +21,7 @@ namespace TouristGuide.Api.DTOs
 
     public class CreateAttractionDto
     {
+        [JsonPropertyName("attractionName")]
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
@@ -26,6 +33,7 @@ namespace TouristGuide.Api.DTOs
 
     public class UpdateAttractionDto
     {
+        [JsonPropertyName("attractionName")]
         public string? Name { get; set; }
         public string? Description { get; set; }
         public string? Location { get; set; }
