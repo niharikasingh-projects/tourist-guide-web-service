@@ -1,10 +1,11 @@
-using TouristGuide.API.DTOs;
+using TouristGuide.Api.DTOs;
 
-namespace TouristGuide.API.Services
+namespace TouristGuide.Api.Services
 {
     public interface IAuthService
     {
-        Task<AuthResponse> SignInAsync(SignInRequest request);
-        Task<AuthResponse> SignUpAsync(SignUpRequest request);
+        Task<AuthResponseDto> SignUpAsync(SignUpDto signUpDto);
+        Task<AuthResponseDto> SignInAsync(SignInDto signInDto);
+        string GenerateJwtToken(int userId, string email, string role);
     }
 }
