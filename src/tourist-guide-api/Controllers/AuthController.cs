@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using TouristGuide.API.DTOs;
-using TouristGuide.API.Services;
+using TouristGuide.Api.DTOs;
+using TouristGuide.Api.Services;
 
-namespace TouristGuide.API.Controllers
+namespace TouristGuide.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -15,26 +15,32 @@ namespace TouristGuide.API.Controllers
             _authService = authService;
         }
 
-        [HttpPost("signin")]
-        public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
+        [HttpPost("signup")]
+        public async Task<IActionResult> SignUp([FromBody] SignUpDto signUpDto)
         {
-            var response = await _authService.SignInAsync(request);
-            
-            if (!response.Success)
-                return BadRequest(response);
-
-            return Ok(response);
+            try
+            {
+                var result = await _authService.SignUpAsync(signUpDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
 
-        [HttpPost("signup")]
-        public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
+        [HttpPost("signin")]
+        public async Task<IActionResult> SignIn([FromBody] SignInDto signInDto)
         {
-            var response = await _authService.SignUpAsync(request);
-            
-            if (!response.Success)
-                return BadRequest(response);
-
-            return Ok(response);
+            try
+            {
+                var result = await _authService.SignInAsync(signInDto);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 }

@@ -1,14 +1,39 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace TouristGuide.API.Models
+namespace TouristGuide.Api.Models
 {
     public class User
     {
         [Key]
         public int Id { get; set; }
-        public string Email { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty; // In production, this should be hashed
+
+        [Required]
+        [StringLength(100)]
         public string Name { get; set; } = string.Empty;
-        public DateTime CreatedAt { get; set; }
+
+        [Required]
+        [EmailAddress]
+        [StringLength(150)]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(255)]
+        public string PasswordHash { get; set; } = string.Empty;
+
+        [Required]
+        [StringLength(20)]
+        public string Role { get; set; } = "tourist"; // "tourist" or "guide"
+
+        [StringLength(15)]
+        public string? PhoneNumber { get; set; }
+
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+        public DateTime? UpdatedAt { get; set; }
+
+        // Navigation properties
+        public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+        public virtual GuideProfile? GuideProfile { get; set; }
     }
 }
