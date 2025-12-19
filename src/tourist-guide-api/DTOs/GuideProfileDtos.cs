@@ -35,11 +35,13 @@ namespace TouristGuide.Api.DTOs
 
         [Required]
         [StringLength(100)]
+        [JsonPropertyName("guideName")]
         public string FullName { get; set; } = string.Empty;
 
         [Required]
         [EmailAddress]
         [StringLength(150)]
+        [JsonPropertyName("guideEmail")]
         public string Email { get; set; } = string.Empty;
 
         [Required]
