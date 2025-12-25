@@ -8,8 +8,8 @@ namespace TouristGuide.Api.DTOs
     {
         public int Id { get; set; }
 
-        [JsonPropertyName("attractionName")]
-        public string Name { get; set; } = string.Empty;
+        //[JsonPropertyName("attractionName")]
+        public string AttractionName { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
@@ -21,20 +21,21 @@ namespace TouristGuide.Api.DTOs
 
     public class CreateAttractionDto
     {
-        [JsonPropertyName("attractionName")]
-        public string Name { get; set; } = string.Empty;
+        //[JsonPropertyName("attractionName")]
+        public string AttractionName { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Location { get; set; } = string.Empty;
-        public string? ImageUrl { get; set; }
+        //public string? ImageUrl { get; set; }
         public string? Category { get; set; }
         public decimal Rating { get; set; }
         public decimal EntryFee { get; set; }
+        public IFormFile? AttractionPicture { get; set; }
     }
 
     public class UpdateAttractionDto
     {
-        [JsonPropertyName("attractionName")]
-        public string? Name { get; set; }
+        //[JsonPropertyName("attractionName")]
+        public string? AttractionName { get; set; }
         public string? Description { get; set; }
         public string? Location { get; set; }
         public string? ImageUrl { get; set; }
@@ -42,5 +43,7 @@ namespace TouristGuide.Api.DTOs
         public decimal? Rating { get; set; }
         public decimal? EntryFee { get; set; }
         public bool? IsActive { get; set; }
+
+        public IFormFile? AttractionPicture { get; set; }
     }
 }

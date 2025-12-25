@@ -30,7 +30,7 @@ BEGIN
         PhoneNumber NVARCHAR(15) NULL,
         CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
         UpdatedAt DATETIME2 NULL,
-        CONSTRAINT CK_Users_Role CHECK (Role IN ('tourist', 'guide'))
+        CONSTRAINT CK_Users_Role CHECK (Role IN ('tourist', 'guide', 'admin'))
     );
     PRINT 'Table Users created successfully.';
 END

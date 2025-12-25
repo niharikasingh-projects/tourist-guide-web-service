@@ -21,7 +21,7 @@ namespace TouristGuide.Api.Services
                 .Select(a => new AttractionDto
                 {
                     Id = a.Id,
-                    Name = a.Name,
+                    AttractionName = a.Name,
                     Description = a.Description,
                     Location = a.Location,
                     ImageUrl = a.ImageUrl,
@@ -41,7 +41,7 @@ namespace TouristGuide.Api.Services
             return new AttractionDto
             {
                 Id = attraction.Id,
-                Name = attraction.Name,
+                AttractionName = attraction.Name,
                 Description = attraction.Description,
                 Location = attraction.Location,
                 ImageUrl = attraction.ImageUrl,
@@ -54,12 +54,14 @@ namespace TouristGuide.Api.Services
 
         public async Task<AttractionDto> CreateAttractionAsync(CreateAttractionDto dto)
         {
+            var imageURL = await ProcessAttractionPictureAsync(dto?.AttractionPicture);
+
             var attraction = new TouristAttraction
             {
-                Name = dto.Name,
+                Name = dto.AttractionName,
                 Description = dto.Description,
                 Location = dto.Location,
-                ImageUrl = dto.ImageUrl,
+                ImageUrl = imageURL,
                 Category = dto.Category,
                 Rating = dto.Rating,
                 EntryFee = dto.EntryFee,
@@ -73,10 +75,10 @@ namespace TouristGuide.Api.Services
             return new AttractionDto
             {
                 Id = attraction.Id,
-                Name = attraction.Name,
+                AttractionName = attraction.Name,
                 Description = attraction.Description,
                 Location = attraction.Location,
-                ImageUrl = attraction.ImageUrl,
+                ImageUrl = imageURL,
                 Category = attraction.Category,
                 Rating = attraction.Rating,
                 EntryFee = attraction.EntryFee,
@@ -89,11 +91,13 @@ namespace TouristGuide.Api.Services
             var attraction = await _context.TouristAttractions.FindAsync(id);
             if (attraction == null) return null;
 
-            if (dto.Name != null) attraction.Name = dto.Name;
-            if (dto.Description != null) attraction.Description = dto.Description;
-            if (dto.Location != null) attraction.Location = dto.Location;
-            if (dto.ImageUrl != null) attraction.ImageUrl = dto.ImageUrl;
-            if (dto.Category != null) attraction.Category = dto.Category;
+            var imageURL = await ProcessAttractionPictureAsync(dto?.AttractionPicture);
+
+            if (dto?.AttractionName != null) attraction.Name = dto.AttractionName;
+            if (dto?.Description != null) attraction.Description = dto.Description;
+            if (dto?.Location != null) attraction.Location = dto.Location;
+            if (dto?.AttractionPicture != null) attraction.ImageUrl = imageURL;
+            if (dto?.Category != null) attraction.Category = dto.Category;
             if (dto.Rating.HasValue) attraction.Rating = dto.Rating.Value;
             if (dto.EntryFee.HasValue) attraction.EntryFee = dto.EntryFee.Value;
             if (dto.IsActive.HasValue) attraction.IsActive = dto.IsActive.Value;
@@ -104,10 +108,10 @@ namespace TouristGuide.Api.Services
             return new AttractionDto
             {
                 Id = attraction.Id,
-                Name = attraction.Name,
+                AttractionName = attraction.Name,
                 Description = attraction.Description,
                 Location = attraction.Location,
-                ImageUrl = attraction.ImageUrl,
+                ImageUrl = imageURL,
                 Category = attraction.Category,
                 Rating = attraction.Rating,
                 EntryFee = attraction.EntryFee,
@@ -134,7 +138,7 @@ namespace TouristGuide.Api.Services
                 .Select(a => new AttractionDto
                 {
                     Id = a.Id,
-                    Name = a.Name,
+                    AttractionName = a.Name,
                     Description = a.Description,
                     Location = a.Location,
                     ImageUrl = a.ImageUrl,
@@ -154,7 +158,7 @@ namespace TouristGuide.Api.Services
                 .Select(a => new AttractionDto
                 {
                     Id = a.Id,
-                    Name = a.Name,
+                    AttractionName = a.Name,
                     Description = a.Description,
                     Location = a.Location,
                     ImageUrl = a.ImageUrl,
@@ -164,6 +168,60 @@ namespace TouristGuide.Api.Services
                     IsActive = a.IsActive
                 })
                 .ToListAsync();
+        }
+
+        private async Task<string> ProcessAttractionPictureAsync(IFormFile picture)
+        {
+            string profileImageUrl = string.Empty;
+
+            // Allowed file types (MIME types)
+            var allowedTypes = new[] { "image/jpg", "image/jpeg", "image/png", "image/gif" };
+            // Max file size (e.g., 2 MB)
+            const long maxFileSize = 2 * 1024 * 1024; // 2 MB
+
+            if (picture != null && picture.Length > 0)
+            {
+                try
+                {
+                    if (!allowedTypes.Contains(picture.ContentType))
+                    {
+                        throw new Exception("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+                    }
+
+                    // Validate file size
+                    if (picture.Length > maxFileSize)
+                    {
+                        throw new Exception("File size exceeds 2 MB limit.");
+                    }
+
+                    var uploadsFolder = Path.Combine(Environment.CurrentDirectory, "images", "attractions");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(picture.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await picture.CopyToAsync(stream);
+                    }
+
+                    profileImageUrl = $"/images/attractions/{fileName}";
+                }
+                catch (IOException)
+                {
+                    // Log the exception as needed
+                    //return StatusCode(500, new { message = "An error occurred while saving the file.", detail = ioEx.Message });
+                    throw;
+                }
+                catch (Exception)
+                {
+                    // Log the exception as needed
+                    //return StatusCode(500, new { message = "Unexpected error during file upload.", detail = ex.Message });
+                    throw;
+                }
+            }
+
+            return profileImageUrl;
         }
     }
 }
