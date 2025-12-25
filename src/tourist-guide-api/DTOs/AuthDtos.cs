@@ -19,7 +19,7 @@ namespace TouristGuide.Api.DTOs
 
         [Required]
         [StringLength(20)]
-        public string Role { get; set; } = "tourist"; // tourist or guide
+        public string Role { get; set; } = "tourist"; // tourist or guide or admin
 
         [StringLength(10)]
         public string? PhoneNumber { get; set; }

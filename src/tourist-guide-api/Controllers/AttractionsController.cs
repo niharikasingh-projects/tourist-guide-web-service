@@ -40,9 +40,10 @@ namespace TouristGuide.Api.Controllers
             return Ok(attractions);
         }
 
-        [Authorize(Roles = "guide")]
+        [Authorize(Roles = "admin")]
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateAttractionDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Create([FromForm] CreateAttractionDto dto)
         {
             try
             {
@@ -55,9 +56,10 @@ namespace TouristGuide.Api.Controllers
             }
         }
 
-        [Authorize(Roles = "guide")]
+        [Authorize(Roles = "admin")]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateAttractionDto dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Update(int id, [FromForm] UpdateAttractionDto dto)
         {
             try
             {
@@ -73,7 +75,7 @@ namespace TouristGuide.Api.Controllers
             }
         }
 
-        [Authorize(Roles = "guide")]
+        [Authorize(Roles = "admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
