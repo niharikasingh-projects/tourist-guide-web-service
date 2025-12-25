@@ -17,13 +17,15 @@ namespace TouristGuide.Api.DTOs
 
         [JsonPropertyName("experienceYears")]
         public int Experience { get; set; }
+        public int TourDuration { get; set; }
+
         public string Languages { get; set; } = string.Empty;
         public string? Bio { get; set; }
         public decimal Rating { get; set; }
 
         [JsonPropertyName("hourlyRate")]
         public decimal PricePerHour { get; set; }
-        public string Availability { get; set; } = string.Empty;
+        public IList<AvailableDateRangeDto> AvailableDates { get; set; } = [];
         public string? ProfileImageUrl { get; set; }
         public bool IsAvailable { get; set; }
     }
@@ -48,8 +50,9 @@ namespace TouristGuide.Api.DTOs
         [StringLength(15)]
         public string PhoneNumber { get; set; } = string.Empty;
 
-        [Range(0, 50)]
-        public int Experience { get; set; }
+        [JsonPropertyName("experienceYears")]
+        public int? Experience { get; set; }
+        public int TourDuration { get; set; }
 
         [Required]
         public string Languages { get; set; } = string.Empty;
@@ -64,7 +67,7 @@ namespace TouristGuide.Api.DTOs
         [Range(0, 10000)]
         public decimal PricePerHour { get; set; }
 
-        public string Availability { get; set; } = string.Empty;
+        public IList<AvailableDateRangeDto> AvailableDates { get; set; } = [];
 
         [StringLength(500)]
         public string? ProfileImageUrl { get; set; }
@@ -74,13 +77,23 @@ namespace TouristGuide.Api.DTOs
     {
         public string? FullName { get; set; }
         public string? PhoneNumber { get; set; }
+
+        [JsonPropertyName("experienceYears")]
         public int? Experience { get; set; }
+        public int TourDuration { get; set; }
         public string? Languages { get; set; }
         public string? Bio { get; set; }
         public decimal? Rating { get; set; }
         public decimal? PricePerHour { get; set; }
-        public string? Availability { get; set; }
+        public IList<AvailableDateRangeDto> AvailableDates { get; set; } = [];
         public string? ProfileImageUrl { get; set; }
         public bool? IsAvailable { get; set; }
+    }
+
+    public class AvailableDateRangeDto
+    {
+
+        public DateTime From { get; set; }
+        public DateTime To { get; set; }
     }
 }
