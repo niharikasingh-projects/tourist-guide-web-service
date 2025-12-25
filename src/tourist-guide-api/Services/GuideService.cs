@@ -50,7 +50,7 @@ namespace TouristGuide.Api.Services
                 Bio = g.Bio,
                 Rating = g.Rating,
                 PricePerHour = g.PricePerHour,
-                Availability = g.Availability,
+                //AvailableDates = g.Availability.Split(','),
                 ProfileImageUrl = g.ProfileImageUrl,
                 IsAvailable = g.IsAvailable
             });
@@ -78,7 +78,7 @@ namespace TouristGuide.Api.Services
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
-                Availability = guide.Availability,
+                //AvailableDates = guide.Availability.Split(','),
                 ProfileImageUrl = guide.ProfileImageUrl,
                 IsAvailable = guide.IsAvailable
             };
@@ -106,7 +106,7 @@ namespace TouristGuide.Api.Services
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
-                Availability = guide.Availability,
+                //AvailableDates = guide.Availability.Split(','),
                 ProfileImageUrl = guide.ProfileImageUrl,
                 IsAvailable = guide.IsAvailable
             };
@@ -127,12 +127,12 @@ namespace TouristGuide.Api.Services
                 FullName = dto.FullName,
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
-                Experience = dto.Experience,
+                Experience = dto.Experience ?? 0,
                 Languages = dto.Languages,
                 Bio = dto.Bio,
                 Rating = dto.Rating,
                 PricePerHour = dto.PricePerHour,
-                Availability = dto.Availability,
+                //Availability = string.Join(",", dto.AvailableDates),
                 ProfileImageUrl = dto.ProfileImageUrl,
                 IsAvailable = true,
                 CreatedAt = DateTime.UtcNow
@@ -157,7 +157,7 @@ namespace TouristGuide.Api.Services
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
-                Availability = guide.Availability,
+                //AvailableDates = guide.Availability.Split(','),
                 ProfileImageUrl = guide.ProfileImageUrl,
                 IsAvailable = guide.IsAvailable
             };
@@ -178,7 +178,7 @@ namespace TouristGuide.Api.Services
             if (dto.Bio != null) guide.Bio = dto.Bio;
             if (dto.Rating.HasValue) guide.Rating = dto.Rating.Value;
             if (dto.PricePerHour.HasValue) guide.PricePerHour = dto.PricePerHour.Value;
-            if (dto.Availability != null) guide.Availability = dto.Availability;
+            //if (dto.AvailableDates != null) guide.Availability = string.Join(",", dto.AvailableDates);
             if (dto.ProfileImageUrl != null) guide.ProfileImageUrl = dto.ProfileImageUrl;
             if (dto.IsAvailable.HasValue) guide.IsAvailable = dto.IsAvailable.Value;
 
@@ -199,7 +199,7 @@ namespace TouristGuide.Api.Services
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
-                Availability = guide.Availability,
+                //AvailableDates = guide.Availability.Split(','),
                 ProfileImageUrl = guide.ProfileImageUrl,
                 IsAvailable = guide.IsAvailable
             };
