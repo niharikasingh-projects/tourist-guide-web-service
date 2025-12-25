@@ -16,7 +16,8 @@ namespace TouristGuide.Api.Controllers
         }
 
         [HttpPost("signup")]
-        public async Task<IActionResult> SignUp([FromBody] SignUpDto signUpDto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> SignUp([FromForm] SignUpDto signUpDto)
         {
             try
             {

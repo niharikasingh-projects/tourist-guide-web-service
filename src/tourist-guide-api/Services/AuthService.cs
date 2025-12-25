@@ -7,6 +7,8 @@ using TouristGuide.Api.Data;
 using TouristGuide.Api.DTOs;
 using TouristGuide.Api.Models;
 using BCrypt.Net;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Http;
 
 namespace TouristGuide.Api.Services
 {
@@ -29,6 +31,9 @@ namespace TouristGuide.Api.Services
                 throw new Exception("Email already registered");
             }
 
+            //Process Profile picture
+            var profileUrl = await ProcessProfilePictureAsync(signUpDto);
+
             // Hash password
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(signUpDto.Password);
 
@@ -40,6 +45,10 @@ namespace TouristGuide.Api.Services
                 PasswordHash = passwordHash,
                 Role = signUpDto.Role,
                 PhoneNumber = signUpDto.PhoneNumber,
+                Languages = signUpDto.Languages,
+                Location = signUpDto.Location,
+                Certifications = signUpDto.Certifications,
+                ProfileImageUrl = profileUrl,
                 CreatedAt = DateTime.UtcNow
             };
 
@@ -90,7 +99,8 @@ namespace TouristGuide.Api.Services
                     Name = user.Name,
                     Email = user.Email,
                     Role = user.Role,
-                    PhoneNumber = user.PhoneNumber
+                    PhoneNumber = user.PhoneNumber,
+                    ProfilePicture = user.ProfileImageUrl
                 }
             };
         }
@@ -117,6 +127,60 @@ namespace TouristGuide.Api.Services
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        private async Task<string> ProcessProfilePictureAsync(SignUpDto dto)
+        {
+            string profileImageUrl = string.Empty;
+
+            // Allowed file types (MIME types)
+            var allowedTypes = new[] { "image/jpg", "image/jpeg", "image/png", "image/gif" };
+            // Max file size (e.g., 2 MB)
+            const long maxFileSize = 2 * 1024 * 1024; // 2 MB
+
+            if (dto.ProfilePicture != null && dto.ProfilePicture.Length > 0)
+            {
+                try
+                {
+                    if (!allowedTypes.Contains(dto.ProfilePicture.ContentType))
+                    {
+                        throw new Exception("Invalid file type. Only JPG, PNG, and GIF are allowed.");
+                    }
+
+                    // Validate file size
+                    if (dto.ProfilePicture.Length > maxFileSize)
+                    {
+                        throw new Exception("File size exceeds 2 MB limit." );
+                    }
+
+                    var uploadsFolder = Path.Combine(Environment.CurrentDirectory, "images", "profiles");
+                    Directory.CreateDirectory(uploadsFolder);
+
+                    var fileName = $"{Guid.NewGuid()}{Path.GetExtension(dto.ProfilePicture.FileName)}";
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await dto.ProfilePicture.CopyToAsync(stream);
+                    }
+
+                    profileImageUrl = $"/images/profiles/{fileName}";
+                }
+                catch (IOException)
+                {
+                    // Log the exception as needed
+                    //return StatusCode(500, new { message = "An error occurred while saving the file.", detail = ioEx.Message });
+                    throw;
+                }
+                catch (Exception)
+                {
+                    // Log the exception as needed
+                    //return StatusCode(500, new { message = "Unexpected error during file upload.", detail = ex.Message });
+                    throw;
+                }
+            }
+
+            return profileImageUrl;
         }
     }
 }
