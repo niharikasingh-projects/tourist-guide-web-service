@@ -21,8 +21,16 @@ namespace TouristGuide.Api.DTOs
         [StringLength(20)]
         public string Role { get; set; } = "tourist"; // tourist or guide
 
-        [StringLength(15)]
+        [StringLength(10)]
         public string? PhoneNumber { get; set; }
+
+        public string? Location { get; set; }
+
+        public string? Languages { get; set; }
+
+        public string? Certifications { get; set; }
+
+        public IFormFile? ProfilePicture { get; set; }
     }
 
     public class SignInDto
@@ -50,5 +58,7 @@ namespace TouristGuide.Api.DTOs
         public string Email { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
+
+        public string? ProfilePicture { get; set; }
     }
 }

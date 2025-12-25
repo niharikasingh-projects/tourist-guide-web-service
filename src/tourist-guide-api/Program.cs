@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -52,6 +53,12 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod()
               .AllowCredentials();
     });
+});
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MemoryBufferThreshold = int.MaxValue;
+    options.MultipartBodyLengthLimit = int.MaxValue;
 });
 
 // Register Services

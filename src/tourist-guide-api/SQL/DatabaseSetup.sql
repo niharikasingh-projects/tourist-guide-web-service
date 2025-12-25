@@ -36,6 +36,23 @@ BEGIN
 END
 GO
 
+ALTER TABLE [Users]
+ADD [Location] NVARCHAR(100) NULL;
+GO
+
+ALTER TABLE [Users]
+ADD [Languages] NVARCHAR(500) NULL;
+GO
+
+ALTER TABLE [Users]
+ADD [Certifications] NVARCHAR(500) NULL;
+GO
+
+ALTER TABLE [Users]
+ADD [ProfileImageUrl] NVARCHAR(500) NULL;
+GO
+
+
 -- Create TouristAttractions Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'TouristAttractions')
 BEGIN

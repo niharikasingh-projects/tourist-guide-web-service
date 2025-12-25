@@ -32,6 +32,14 @@ namespace TouristGuide.Api.Models
 
         public DateTime? UpdatedAt { get; set; }
 
+        public string? Location { get; set; }
+
+        public string? Languages { get; set; }
+
+        public string? Certifications { get; set; }
+
+        public string? ProfileImageUrl { get; set; }
+
         // Navigation properties
         public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
         public virtual GuideProfile? GuideProfile { get; set; }
