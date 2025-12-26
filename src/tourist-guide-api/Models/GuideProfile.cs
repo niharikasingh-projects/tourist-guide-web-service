@@ -40,8 +40,6 @@ namespace TouristGuide.Api.Models
         [Column(TypeName = "decimal(10,2)")]
         public decimal PricePerHour { get; set; }
 
-        public string Availability { get; set; } = string.Empty; // JSON format
-
         [StringLength(500)]
         public string? ProfileImageUrl { get; set; }
 
@@ -59,5 +57,7 @@ namespace TouristGuide.Api.Models
         public virtual TouristAttraction Attraction { get; set; } = null!;
 
         public virtual ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+        
+        public virtual ICollection<GuideAvailableDate> AvailableDates { get; set; } = new List<GuideAvailableDate>();
     }
 }

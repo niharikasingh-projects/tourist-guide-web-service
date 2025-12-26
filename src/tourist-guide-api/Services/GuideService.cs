@@ -18,6 +18,7 @@ namespace TouristGuide.Api.Services
         {
             var query = _context.GuideProfiles
                 .Include(g => g.Attraction)
+                .Include(g => g.AvailableDates)
                 .Where(g => g.AttractionId == attractionId && g.IsAvailable);
 
             var guides = await query.ToListAsync();
@@ -36,6 +37,8 @@ namespace TouristGuide.Api.Services
                 guides = availableGuides;
             }
 
+            //var profileURL = _context.Users.Where(u => u.Id == )
+
             return guides.Select(g => new GuideProfileDto
             {
                 Id = g.Id,
@@ -50,8 +53,12 @@ namespace TouristGuide.Api.Services
                 Bio = g.Bio,
                 Rating = g.Rating,
                 PricePerHour = g.PricePerHour,
-                //AvailableDates = g.Availability.Split(','),
-                ProfileImageUrl = g.ProfileImageUrl,
+                AvailableDates = g.AvailableDates.Select(d => new AvailableDateRangeDto
+                {
+                    From = d.FromDate,
+                    To = d.ToDate
+                }).ToList(),
+                ProfileImageUrl = _context.Users.Where(u => u.Id == g.UserId).FirstOrDefault().ProfileImageUrl,
                 IsAvailable = g.IsAvailable
             });
         }
@@ -60,6 +67,7 @@ namespace TouristGuide.Api.Services
         {
             var guide = await _context.GuideProfiles
                 .Include(g => g.Attraction)
+                .Include(g => g.AvailableDates)
                 .FirstOrDefaultAsync(g => g.Id == id);
 
             if (guide == null) return null;
@@ -78,7 +86,11 @@ namespace TouristGuide.Api.Services
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
-                //AvailableDates = guide.Availability.Split(','),
+                AvailableDates = guide.AvailableDates.Select(d => new AvailableDateRangeDto
+                {
+                    From = d.FromDate,
+                    To = d.ToDate
+                }).ToList(),
                 ProfileImageUrl = guide.ProfileImageUrl,
                 IsAvailable = guide.IsAvailable
             };
@@ -88,6 +100,7 @@ namespace TouristGuide.Api.Services
         {
             var guide = await _context.GuideProfiles
                 .Include(g => g.Attraction)
+                .Include(g => g.AvailableDates)
                 .FirstOrDefaultAsync(g => g.UserId == userId);
 
             if (guide == null) return null;
@@ -106,7 +119,11 @@ namespace TouristGuide.Api.Services
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
-                //AvailableDates = guide.Availability.Split(','),
+                AvailableDates = guide.AvailableDates.Select(d => new AvailableDateRangeDto
+                {
+                    From = d.FromDate,
+                    To = d.ToDate
+                }).ToList(),
                 ProfileImageUrl = guide.ProfileImageUrl,
                 IsAvailable = guide.IsAvailable
             };
@@ -130,9 +147,8 @@ namespace TouristGuide.Api.Services
                 Experience = dto.Experience ?? 0,
                 Languages = dto.Languages,
                 Bio = dto.Bio,
-                Rating = dto.Rating,
+                Rating = dto.Rating == 0 ? 4 : dto.Rating,
                 PricePerHour = dto.PricePerHour,
-                //Availability = string.Join(",", dto.AvailableDates),
                 ProfileImageUrl = dto.ProfileImageUrl,
                 IsAvailable = true,
                 CreatedAt = DateTime.UtcNow
@@ -140,6 +156,21 @@ namespace TouristGuide.Api.Services
 
             _context.GuideProfiles.Add(guide);
             await _context.SaveChangesAsync();
+
+            // Add available dates
+            if (dto.AvailableDates != null && dto.AvailableDates.Any())
+            {
+                var availableDates = dto.AvailableDates.Select(d => new GuideAvailableDate
+                {
+                    GuideProfileId = guide.Id,
+                    FromDate = d.From,
+                    ToDate = d.To,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+
+                _context.GuideAvailableDates.AddRange(availableDates);
+                await _context.SaveChangesAsync();
+            }
 
             var attraction = await _context.TouristAttractions.FindAsync(dto.AttractionId);
 
@@ -157,7 +188,7 @@ namespace TouristGuide.Api.Services
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
-                //AvailableDates = guide.Availability.Split(','),
+                AvailableDates = dto.AvailableDates ?? new List<AvailableDateRangeDto>(),
                 ProfileImageUrl = guide.ProfileImageUrl,
                 IsAvailable = guide.IsAvailable
             };
@@ -178,12 +209,35 @@ namespace TouristGuide.Api.Services
             if (dto.Bio != null) guide.Bio = dto.Bio;
             if (dto.Rating.HasValue) guide.Rating = dto.Rating.Value;
             if (dto.PricePerHour.HasValue) guide.PricePerHour = dto.PricePerHour.Value;
-            //if (dto.AvailableDates != null) guide.Availability = string.Join(",", dto.AvailableDates);
             if (dto.ProfileImageUrl != null) guide.ProfileImageUrl = dto.ProfileImageUrl;
             if (dto.IsAvailable.HasValue) guide.IsAvailable = dto.IsAvailable.Value;
 
+            // Update available dates if provided
+            if (dto.AvailableDates != null && dto.AvailableDates.Any())
+            {
+                // Remove existing dates
+                var existingDates = await _context.GuideAvailableDates
+                    .Where(d => d.GuideProfileId == guide.Id)
+                    .ToListAsync();
+                _context.GuideAvailableDates.RemoveRange(existingDates);
+
+                // Add new dates
+                var newDates = dto.AvailableDates.Select(d => new GuideAvailableDate
+                {
+                    GuideProfileId = guide.Id,
+                    FromDate = d.From,
+                    ToDate = d.To,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+
+                _context.GuideAvailableDates.AddRange(newDates);
+            }
+
             guide.UpdatedAt = DateTime.UtcNow;
             await _context.SaveChangesAsync();
+
+            // Reload to get updated AvailableDates
+            await _context.Entry(guide).Collection(g => g.AvailableDates).LoadAsync();
 
             return new GuideProfileDto
             {
@@ -199,7 +253,11 @@ namespace TouristGuide.Api.Services
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
-                //AvailableDates = guide.Availability.Split(','),
+                AvailableDates = guide.AvailableDates.Select(d => new AvailableDateRangeDto
+                {
+                    From = d.FromDate,
+                    To = d.ToDate
+                }).ToList(),
                 ProfileImageUrl = guide.ProfileImageUrl,
                 IsAvailable = guide.IsAvailable
             };

@@ -13,6 +13,7 @@ namespace TouristGuide.Api.Data
         public DbSet<User> Users { get; set; }
         public DbSet<TouristAttraction> TouristAttractions { get; set; }
         public DbSet<GuideProfile> GuideProfiles { get; set; }
+        public DbSet<GuideAvailableDate> GuideAvailableDates { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<Payment> Payments { get; set; }
 
@@ -50,6 +51,15 @@ namespace TouristGuide.Api.Data
                     .WithMany(a => a.GuideProfiles)
                     .HasForeignKey(g => g.AttractionId)
                     .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // GuideAvailableDate configuration
+            modelBuilder.Entity<GuideAvailableDate>(entity =>
+            {
+                entity.HasOne(d => d.GuideProfile)
+                    .WithMany(g => g.AvailableDates)
+                    .HasForeignKey(d => d.GuideProfileId)
+                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Booking configuration

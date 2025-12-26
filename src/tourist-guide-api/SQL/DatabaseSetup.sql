@@ -89,7 +89,6 @@ BEGIN
         Bio NVARCHAR(500) NULL,
         Rating DECIMAL(3, 2) NOT NULL DEFAULT 0,
         PricePerHour DECIMAL(10, 2) NOT NULL,
-        Availability NVARCHAR(MAX) NOT NULL,
         ProfileImageUrl NVARCHAR(500) NULL,
         IsAvailable BIT NOT NULL DEFAULT 1,
         CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
@@ -100,6 +99,21 @@ BEGIN
         CONSTRAINT CK_GuideProfiles_Rating CHECK (Rating >= 0 AND Rating <= 5)
     );
     PRINT 'Table GuideProfiles created successfully.';
+END
+GO
+
+-- Create GuideAvailableDates Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'GuideAvailableDates')
+BEGIN
+    CREATE TABLE GuideAvailableDates (
+        Id INT PRIMARY KEY IDENTITY(1,1),
+        GuideProfileId INT NOT NULL,
+        FromDate DATETIME2 NOT NULL,
+        ToDate DATETIME2 NOT NULL,
+        CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        CONSTRAINT FK_GuideAvailableDates_GuideProfiles FOREIGN KEY (GuideProfileId) REFERENCES GuideProfiles(Id) ON DELETE CASCADE
+    );
+    PRINT 'Table GuideAvailableDates created successfully.';
 END
 GO
 
@@ -161,6 +175,7 @@ GO
 CREATE NONCLUSTERED INDEX IX_Users_Email ON Users(Email);
 CREATE NONCLUSTERED INDEX IX_GuideProfiles_UserId ON GuideProfiles(UserId);
 CREATE NONCLUSTERED INDEX IX_GuideProfiles_AttractionId ON GuideProfiles(AttractionId);
+CREATE NONCLUSTERED INDEX IX_GuideAvailableDates_GuideProfileId ON GuideAvailableDates(GuideProfileId);
 CREATE NONCLUSTERED INDEX IX_Bookings_UserId ON Bookings(UserId);
 CREATE NONCLUSTERED INDEX IX_Bookings_GuideId ON Bookings(GuideId);
 CREATE NONCLUSTERED INDEX IX_Bookings_BookingDate ON Bookings(BookingDate);
