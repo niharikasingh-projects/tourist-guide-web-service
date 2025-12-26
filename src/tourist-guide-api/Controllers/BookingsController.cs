@@ -98,7 +98,7 @@ namespace TouristGuide.Api.Controllers
             }
         }
 
-        [HttpDelete("{id}/cancel")]
+        [HttpPut("{id}/cancel")]
         public async Task<IActionResult> CancelBooking(int id)
         {
             try
