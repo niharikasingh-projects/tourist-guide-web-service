@@ -63,7 +63,7 @@ namespace TouristGuide.Api.Services
                 Location = dto.Location,
                 ImageUrl = imageURL,
                 Category = dto.Category,
-                Rating = dto.Rating,
+                Rating = dto.Rating == 0 ? 4.5M : dto.Rating,
                 EntryFee = dto.EntryFee,
                 IsActive = true,
                 CreatedAt = DateTime.UtcNow

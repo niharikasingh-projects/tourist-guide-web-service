@@ -85,6 +85,7 @@ BEGIN
         Email NVARCHAR(150) NOT NULL,
         PhoneNumber NVARCHAR(15) NOT NULL,
         Experience INT NOT NULL,
+        TourDuration INT NOT NULL DEFAULT 2,
         Languages NVARCHAR(MAX) NOT NULL,
         Bio NVARCHAR(500) NULL,
         Rating DECIMAL(3, 2) NOT NULL DEFAULT 0,

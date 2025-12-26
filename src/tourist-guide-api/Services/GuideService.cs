@@ -14,7 +14,7 @@ namespace TouristGuide.Api.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<GuideProfileDto>> GetGuidesByAttractionIdAsync(int attractionId, string? timeFrom = null, string? timeTo = null)
+        public async Task<IEnumerable<GuideProfileDto>> GetGuidesByAttractionIdAsync(int attractionId, DateTime? fromDate = null, string? timeFrom = null, string? timeTo = null)
         {
             var query = _context.GuideProfiles
                 .Include(g => g.Attraction)
@@ -29,7 +29,7 @@ namespace TouristGuide.Api.Services
                 var availableGuides = new List<GuideProfile>();
                 foreach (var guide in guides)
                 {
-                    if (await IsGuideAvailableAsync(guide.Id, DateTime.Today, timeFrom, timeTo))
+                    if (await IsGuideAvailableAsync(guide.Id, fromDate.HasValue ? fromDate.Value : DateTime.Today, timeFrom, timeTo))
                     {
                         availableGuides.Add(guide);
                     }
@@ -49,6 +49,7 @@ namespace TouristGuide.Api.Services
                 Email = g.Email,
                 PhoneNumber = g.PhoneNumber,
                 Experience = g.Experience,
+                TourDuration = g.TourDuration,
                 Languages = g.Languages,
                 Bio = g.Bio,
                 Rating = g.Rating,
@@ -82,6 +83,7 @@ namespace TouristGuide.Api.Services
                 Email = guide.Email,
                 PhoneNumber = guide.PhoneNumber,
                 Experience = guide.Experience,
+                TourDuration = guide.TourDuration,
                 Languages = guide.Languages,
                 Bio = guide.Bio,
                 Rating = guide.Rating,
@@ -115,6 +117,7 @@ namespace TouristGuide.Api.Services
                 Email = guide.Email,
                 PhoneNumber = guide.PhoneNumber,
                 Experience = guide.Experience,
+                TourDuration = guide.TourDuration,
                 Languages = guide.Languages,
                 Bio = guide.Bio,
                 Rating = guide.Rating,
@@ -145,6 +148,7 @@ namespace TouristGuide.Api.Services
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
                 Experience = dto.Experience ?? 0,
+                TourDuration = dto.TourDuration,
                 Languages = dto.Languages,
                 Bio = dto.Bio,
                 Rating = dto.Rating == 0 ? 4 : dto.Rating,
@@ -184,6 +188,7 @@ namespace TouristGuide.Api.Services
                 Email = guide.Email,
                 PhoneNumber = guide.PhoneNumber,
                 Experience = guide.Experience,
+                TourDuration = guide.TourDuration,
                 Languages = guide.Languages,
                 Bio = guide.Bio,
                 Rating = guide.Rating,
@@ -205,6 +210,7 @@ namespace TouristGuide.Api.Services
             if (dto.FullName != null) guide.FullName = dto.FullName;
             if (dto.PhoneNumber != null) guide.PhoneNumber = dto.PhoneNumber;
             if (dto.Experience.HasValue) guide.Experience = dto.Experience.Value;
+            if (dto.TourDuration > 0) guide.TourDuration = dto.TourDuration;
             if (dto.Languages != null) guide.Languages = dto.Languages;
             if (dto.Bio != null) guide.Bio = dto.Bio;
             if (dto.Rating.HasValue) guide.Rating = dto.Rating.Value;
@@ -249,6 +255,7 @@ namespace TouristGuide.Api.Services
                 Email = guide.Email,
                 PhoneNumber = guide.PhoneNumber,
                 Experience = guide.Experience,
+                TourDuration = guide.TourDuration,
                 Languages = guide.Languages,
                 Bio = guide.Bio,
                 Rating = guide.Rating,
@@ -265,6 +272,12 @@ namespace TouristGuide.Api.Services
 
         public async Task<bool> IsGuideAvailableAsync(int guideId, DateTime date, string timeFrom, string timeTo)
         {
+            var isAvailable = await _context.GuideAvailableDates
+                .AnyAsync(d =>
+                    d.GuideProfileId == guideId &&
+                    d.FromDate.Date <= date.Date &&
+                    d.ToDate.Date >= date.Date);
+
             // Check for conflicting bookings
             var hasConflict = await _context.Bookings
                 .AnyAsync(b =>
@@ -278,7 +291,7 @@ namespace TouristGuide.Api.Services
                     )
                 );
 
-            return !hasConflict;
+            return isAvailable && !hasConflict;
         }
     }
 }
