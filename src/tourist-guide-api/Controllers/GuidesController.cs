@@ -18,9 +18,9 @@ namespace TouristGuide.Api.Controllers
         }
 
         [HttpGet("by-attraction/{attractionId}")]
-        public async Task<IActionResult> GetByAttraction(int attractionId, [FromQuery] string? timeFrom = null, [FromQuery] string? timeTo = null)
+        public async Task<IActionResult> GetByAttraction(int attractionId, [FromQuery] DateTime? fromDate = null, [FromQuery] string? timeFrom = null, [FromQuery] string? timeTo = null)
         {
-            var guides = await _guideService.GetGuidesByAttractionIdAsync(attractionId, timeFrom, timeTo);
+            var guides = await _guideService.GetGuidesByAttractionIdAsync(attractionId, fromDate, timeFrom, timeTo);
             return Ok(guides);
         }
 

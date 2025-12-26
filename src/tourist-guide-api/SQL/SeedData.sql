@@ -43,12 +43,12 @@ GO
 -- Insert Guide Profiles
 SET IDENTITY_INSERT GuideProfiles ON;
 
-INSERT INTO GuideProfiles (Id, UserId, AttractionId, FullName, Email, PhoneNumber, Experience, Languages, Bio, Rating, PricePerHour, ProfileImageUrl, IsAvailable, CreatedAt) VALUES
-(1, 4, 1, 'Rajesh Kumar', 'rajesh@guide.com', '9876543213', 10, 'English, Hindi, Urdu', 'Expert guide with 10 years of experience at Taj Mahal. Specialized in Mughal history and architecture.', 4.8, 500.00, 'https://randomuser.me/api/portraits/men/1.jpg', 1, GETUTCDATE()),
-(2, 5, 1, 'Priya Sharma', 'priya@guide.com', '9876543214', 7, 'English, Hindi', 'Passionate about Indian heritage with 7 years of guiding experience. Known for engaging storytelling.', 4.7, 450.00, 'https://randomuser.me/api/portraits/women/1.jpg', 1, GETUTCDATE()),
-(3, 6, 2, 'Amit Patel', 'amit@guide.com', '9876543215', 12, 'English, Hindi, French', 'Senior guide at Red Fort with extensive knowledge of Delhi history and Mughal dynasty.', 4.9, 550.00, 'https://randomuser.me/api/portraits/men/2.jpg', 1, GETUTCDATE()),
-(4, 7, 3, 'Deepika Singh', 'deepika@guide.com', '9876543216', 5, 'English, Hindi, Marathi', 'Energetic guide with deep knowledge of Mumbai landmarks and colonial history.', 4.5, 400.00, 'https://randomuser.me/api/portraits/women/2.jpg', 1, GETUTCDATE()),
-(5, 8, 4, 'Vikram Malhotra', 'vikram@guide.com', '9876543217', 8, 'English, Hindi, Rajasthani', 'Specialist in Rajasthani culture and architecture with 8 years of experience.', 4.6, 475.00, 'https://randomuser.me/api/portraits/men/3.jpg', 1, GETUTCDATE());
+INSERT INTO GuideProfiles (Id, UserId, AttractionId, FullName, Email, PhoneNumber, Experience, TourDuration, Languages, Bio, Rating, PricePerHour, ProfileImageUrl, IsAvailable, CreatedAt) VALUES
+(1, 4, 1, 'Rajesh Kumar', 'rajesh@guide.com', '9876543213', 10, 3, 'English, Hindi, Urdu', 'Expert guide with 10 years of experience at Taj Mahal. Specialized in Mughal history and architecture.', 4.8, 500.00, 'https://randomuser.me/api/portraits/men/1.jpg', 1, GETUTCDATE()),
+(2, 5, 1, 'Priya Sharma', 'priya@guide.com', '9876543214', 7, 2, 'English, Hindi', 'Passionate about Indian heritage with 7 years of guiding experience. Known for engaging storytelling.', 4.7, 450.00, 'https://randomuser.me/api/portraits/women/1.jpg', 1, GETUTCDATE()),
+(3, 6, 2, 'Amit Patel', 'amit@guide.com', '9876543215', 12, 4, 'English, Hindi, French', 'Senior guide at Red Fort with extensive knowledge of Delhi history and Mughal dynasty.', 4.9, 550.00, 'https://randomuser.me/api/portraits/men/2.jpg', 1, GETUTCDATE()),
+(4, 7, 3, 'Deepika Singh', 'deepika@guide.com', '9876543216', 5, 2, 'English, Hindi, Marathi', 'Energetic guide with deep knowledge of Mumbai landmarks and colonial history.', 4.5, 400.00, 'https://randomuser.me/api/portraits/women/2.jpg', 1, GETUTCDATE()),
+(5, 8, 4, 'Vikram Malhotra', 'vikram@guide.com', '9876543217', 8, 3, 'English, Hindi, Rajasthani', 'Specialist in Rajasthani culture and architecture with 8 years of experience.', 4.6, 475.00, 'https://randomuser.me/api/portraits/men/3.jpg', 1, GETUTCDATE());
 
 SET IDENTITY_INSERT GuideProfiles OFF;
 GO

@@ -28,6 +28,8 @@ namespace TouristGuide.Api.Models
 
         public int Experience { get; set; } // Years of experience
 
+        public int TourDuration { get; set; } // Tour duration in hours
+
         [Required]
         public string Languages { get; set; } = string.Empty; // Comma-separated
 

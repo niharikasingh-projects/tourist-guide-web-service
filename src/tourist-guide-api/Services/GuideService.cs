@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using TouristGuide.Api.Data;
 using TouristGuide.Api.DTOs;
@@ -14,7 +15,7 @@ namespace TouristGuide.Api.Services
             _context = context;
         }
 
-        public async Task<IEnumerable<GuideProfileDto>> GetGuidesByAttractionIdAsync(int attractionId, string? timeFrom = null, string? timeTo = null)
+        public async Task<IEnumerable<GuideProfileDto>> GetGuidesByAttractionIdAsync(int attractionId, DateTime? fromDate = null, string? timeFrom = null, string? timeTo = null)
         {
             var query = _context.GuideProfiles
                 .Include(g => g.Attraction)
@@ -29,7 +30,7 @@ namespace TouristGuide.Api.Services
                 var availableGuides = new List<GuideProfile>();
                 foreach (var guide in guides)
                 {
-                    if (await IsGuideAvailableAsync(guide.Id, DateTime.Today, timeFrom, timeTo))
+                    if (await IsGuideAvailableAsync(guide.Id, fromDate.HasValue ? fromDate.Value : DateTime.Today, timeFrom, timeTo))
                     {
                         availableGuides.Add(guide);
                     }
@@ -49,6 +50,7 @@ namespace TouristGuide.Api.Services
                 Email = g.Email,
                 PhoneNumber = g.PhoneNumber,
                 Experience = g.Experience,
+                TourDuration = g.TourDuration,
                 Languages = g.Languages,
                 Bio = g.Bio,
                 Rating = g.Rating,
@@ -59,7 +61,8 @@ namespace TouristGuide.Api.Services
                     To = d.ToDate
                 }).ToList(),
                 ProfileImageUrl = _context.Users.Where(u => u.Id == g.UserId).FirstOrDefault().ProfileImageUrl,
-                IsAvailable = g.IsAvailable
+                IsAvailable = g.IsAvailable,
+                Location = g.Attraction.Location
             });
         }
 
@@ -82,6 +85,7 @@ namespace TouristGuide.Api.Services
                 Email = guide.Email,
                 PhoneNumber = guide.PhoneNumber,
                 Experience = guide.Experience,
+                TourDuration = guide.TourDuration,
                 Languages = guide.Languages,
                 Bio = guide.Bio,
                 Rating = guide.Rating,
@@ -92,41 +96,52 @@ namespace TouristGuide.Api.Services
                     To = d.ToDate
                 }).ToList(),
                 ProfileImageUrl = guide.ProfileImageUrl,
-                IsAvailable = guide.IsAvailable
+                IsAvailable = guide.IsAvailable,
+                Location = guide.Attraction.Location
             };
         }
 
-        public async Task<GuideProfileDto?> GetGuideProfileByUserIdAsync(int userId)
+        public async Task<IEnumerable<GuideProfileDto?>> GetGuideProfileByUserIdAsync(int userId)
         {
-            var guide = await _context.GuideProfiles
+            var guideProfileResults = new List<GuideProfileDto>();
+            var guideProfiles = await _context.GuideProfiles
                 .Include(g => g.Attraction)
                 .Include(g => g.AvailableDates)
-                .FirstOrDefaultAsync(g => g.UserId == userId);
+                .Where(g => g.UserId == userId).ToListAsync();
 
-            if (guide == null) return null;
+            if (guideProfiles == null || guideProfiles.Count == 0) return [];
 
-            return new GuideProfileDto
+            foreach (var guide in guideProfiles)
             {
-                Id = guide.Id,
-                UserId = guide.UserId,
-                AttractionId = guide.AttractionId,
-                AttractionName = guide.Attraction.Name,
-                FullName = guide.FullName,
-                Email = guide.Email,
-                PhoneNumber = guide.PhoneNumber,
-                Experience = guide.Experience,
-                Languages = guide.Languages,
-                Bio = guide.Bio,
-                Rating = guide.Rating,
-                PricePerHour = guide.PricePerHour,
-                AvailableDates = guide.AvailableDates.Select(d => new AvailableDateRangeDto
+                var guideProfile = new GuideProfileDto
                 {
-                    From = d.FromDate,
-                    To = d.ToDate
-                }).ToList(),
-                ProfileImageUrl = guide.ProfileImageUrl,
-                IsAvailable = guide.IsAvailable
-            };
+                    Id = guide.Id,
+                    UserId = guide.UserId,
+                    AttractionId = guide.AttractionId,
+                    AttractionName = guide.Attraction.Name,
+                    FullName = guide.FullName,
+                    Email = guide.Email,
+                    PhoneNumber = guide.PhoneNumber,
+                    Experience = guide.Experience,
+                    TourDuration = guide.TourDuration,
+                    Languages = guide.Languages,
+                    Bio = guide.Bio,
+                    Rating = guide.Rating,
+                    PricePerHour = guide.PricePerHour,
+                    AvailableDates = guide.AvailableDates.Select(d => new AvailableDateRangeDto
+                    {
+                        From = d.FromDate,
+                        To = d.ToDate
+                    }).ToList(),
+                    ProfileImageUrl = _context.Users.Where(u => u.Id == guide.UserId).FirstOrDefault().ProfileImageUrl,
+                    IsAvailable = guide.IsAvailable,
+                    Location = guide.Attraction.Location
+                };
+
+                guideProfileResults.Add(guideProfile);
+            }
+
+            return guideProfileResults;
         }
 
         public async Task<GuideProfileDto> CreateGuideProfileAsync(int userId, CreateGuideProfileDto dto)
@@ -145,6 +160,7 @@ namespace TouristGuide.Api.Services
                 Email = dto.Email,
                 PhoneNumber = dto.PhoneNumber,
                 Experience = dto.Experience ?? 0,
+                TourDuration = dto.TourDuration,
                 Languages = dto.Languages,
                 Bio = dto.Bio,
                 Rating = dto.Rating == 0 ? 4 : dto.Rating,
@@ -184,13 +200,15 @@ namespace TouristGuide.Api.Services
                 Email = guide.Email,
                 PhoneNumber = guide.PhoneNumber,
                 Experience = guide.Experience,
+                TourDuration = guide.TourDuration,
                 Languages = guide.Languages,
                 Bio = guide.Bio,
                 Rating = guide.Rating,
                 PricePerHour = guide.PricePerHour,
                 AvailableDates = dto.AvailableDates ?? new List<AvailableDateRangeDto>(),
                 ProfileImageUrl = guide.ProfileImageUrl,
-                IsAvailable = guide.IsAvailable
+                IsAvailable = guide.IsAvailable,
+                Location = guide.Attraction.Location
             };
         }
 
@@ -205,6 +223,7 @@ namespace TouristGuide.Api.Services
             if (dto.FullName != null) guide.FullName = dto.FullName;
             if (dto.PhoneNumber != null) guide.PhoneNumber = dto.PhoneNumber;
             if (dto.Experience.HasValue) guide.Experience = dto.Experience.Value;
+            if (dto.TourDuration > 0) guide.TourDuration = dto.TourDuration;
             if (dto.Languages != null) guide.Languages = dto.Languages;
             if (dto.Bio != null) guide.Bio = dto.Bio;
             if (dto.Rating.HasValue) guide.Rating = dto.Rating.Value;
@@ -249,6 +268,7 @@ namespace TouristGuide.Api.Services
                 Email = guide.Email,
                 PhoneNumber = guide.PhoneNumber,
                 Experience = guide.Experience,
+                TourDuration = guide.TourDuration,
                 Languages = guide.Languages,
                 Bio = guide.Bio,
                 Rating = guide.Rating,
@@ -259,12 +279,19 @@ namespace TouristGuide.Api.Services
                     To = d.ToDate
                 }).ToList(),
                 ProfileImageUrl = guide.ProfileImageUrl,
-                IsAvailable = guide.IsAvailable
+                IsAvailable = guide.IsAvailable,
+                Location = guide.Attraction.Location
             };
         }
 
         public async Task<bool> IsGuideAvailableAsync(int guideId, DateTime date, string timeFrom, string timeTo)
         {
+            var isAvailable = await _context.GuideAvailableDates
+                .AnyAsync(d =>
+                    d.GuideProfileId == guideId &&
+                    d.FromDate.Date <= date.Date &&
+                    d.ToDate.Date >= date.Date);
+
             // Check for conflicting bookings
             var hasConflict = await _context.Bookings
                 .AnyAsync(b =>
@@ -278,7 +305,7 @@ namespace TouristGuide.Api.Services
                     )
                 );
 
-            return !hasConflict;
+            return isAvailable && !hasConflict;
         }
     }
 }
