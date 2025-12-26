@@ -28,6 +28,8 @@ namespace TouristGuide.Api.DTOs
         public IList<AvailableDateRangeDto> AvailableDates { get; set; } = [];
         public string? ProfileImageUrl { get; set; }
         public bool IsAvailable { get; set; }
+
+        public string? Location { get; set; }
     }
 
     public class CreateGuideProfileDto

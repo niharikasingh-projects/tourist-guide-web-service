@@ -1,3 +1,4 @@
+using System;
 using Microsoft.EntityFrameworkCore;
 using TouristGuide.Api.Data;
 using TouristGuide.Api.DTOs;
@@ -60,7 +61,8 @@ namespace TouristGuide.Api.Services
                     To = d.ToDate
                 }).ToList(),
                 ProfileImageUrl = _context.Users.Where(u => u.Id == g.UserId).FirstOrDefault().ProfileImageUrl,
-                IsAvailable = g.IsAvailable
+                IsAvailable = g.IsAvailable,
+                Location = g.Attraction.Location
             });
         }
 
@@ -94,42 +96,52 @@ namespace TouristGuide.Api.Services
                     To = d.ToDate
                 }).ToList(),
                 ProfileImageUrl = guide.ProfileImageUrl,
-                IsAvailable = guide.IsAvailable
+                IsAvailable = guide.IsAvailable,
+                Location = guide.Attraction.Location
             };
         }
 
-        public async Task<GuideProfileDto?> GetGuideProfileByUserIdAsync(int userId)
+        public async Task<IEnumerable<GuideProfileDto?>> GetGuideProfileByUserIdAsync(int userId)
         {
-            var guide = await _context.GuideProfiles
+            var guideProfileResults = new List<GuideProfileDto>();
+            var guideProfiles = await _context.GuideProfiles
                 .Include(g => g.Attraction)
                 .Include(g => g.AvailableDates)
-                .FirstOrDefaultAsync(g => g.UserId == userId);
+                .Where(g => g.UserId == userId).ToListAsync();
 
-            if (guide == null) return null;
+            if (guideProfiles == null || guideProfiles.Count == 0) return [];
 
-            return new GuideProfileDto
+            foreach (var guide in guideProfiles)
             {
-                Id = guide.Id,
-                UserId = guide.UserId,
-                AttractionId = guide.AttractionId,
-                AttractionName = guide.Attraction.Name,
-                FullName = guide.FullName,
-                Email = guide.Email,
-                PhoneNumber = guide.PhoneNumber,
-                Experience = guide.Experience,
-                TourDuration = guide.TourDuration,
-                Languages = guide.Languages,
-                Bio = guide.Bio,
-                Rating = guide.Rating,
-                PricePerHour = guide.PricePerHour,
-                AvailableDates = guide.AvailableDates.Select(d => new AvailableDateRangeDto
+                var guideProfile = new GuideProfileDto
                 {
-                    From = d.FromDate,
-                    To = d.ToDate
-                }).ToList(),
-                ProfileImageUrl = guide.ProfileImageUrl,
-                IsAvailable = guide.IsAvailable
-            };
+                    Id = guide.Id,
+                    UserId = guide.UserId,
+                    AttractionId = guide.AttractionId,
+                    AttractionName = guide.Attraction.Name,
+                    FullName = guide.FullName,
+                    Email = guide.Email,
+                    PhoneNumber = guide.PhoneNumber,
+                    Experience = guide.Experience,
+                    TourDuration = guide.TourDuration,
+                    Languages = guide.Languages,
+                    Bio = guide.Bio,
+                    Rating = guide.Rating,
+                    PricePerHour = guide.PricePerHour,
+                    AvailableDates = guide.AvailableDates.Select(d => new AvailableDateRangeDto
+                    {
+                        From = d.FromDate,
+                        To = d.ToDate
+                    }).ToList(),
+                    ProfileImageUrl = _context.Users.Where(u => u.Id == guide.UserId).FirstOrDefault().ProfileImageUrl,
+                    IsAvailable = guide.IsAvailable,
+                    Location = guide.Attraction.Location
+                };
+
+                guideProfileResults.Add(guideProfile);
+            }
+
+            return guideProfileResults;
         }
 
         public async Task<GuideProfileDto> CreateGuideProfileAsync(int userId, CreateGuideProfileDto dto)
@@ -195,7 +207,8 @@ namespace TouristGuide.Api.Services
                 PricePerHour = guide.PricePerHour,
                 AvailableDates = dto.AvailableDates ?? new List<AvailableDateRangeDto>(),
                 ProfileImageUrl = guide.ProfileImageUrl,
-                IsAvailable = guide.IsAvailable
+                IsAvailable = guide.IsAvailable,
+                Location = guide.Attraction.Location
             };
         }
 
@@ -266,7 +279,8 @@ namespace TouristGuide.Api.Services
                     To = d.ToDate
                 }).ToList(),
                 ProfileImageUrl = guide.ProfileImageUrl,
-                IsAvailable = guide.IsAvailable
+                IsAvailable = guide.IsAvailable,
+                Location = guide.Attraction.Location
             };
         }
 
