@@ -176,8 +176,8 @@ namespace TouristGuide.Api.Services
                 TouristEmail = booking.TouristEmail,
                 TouristPhone = booking.TouristPhone,
                 SpecialRequests = booking.SpecialRequests,
-                PaymentMethod = booking.Payment.PaymentMethod,
-                PaymentStatus = booking.Payment.Status,
+                PaymentMethod = booking?.Payment?.PaymentMethod ?? string.Empty,
+                PaymentStatus = booking?.Payment?.Status ?? string.Empty,
                 CreatedAt = booking.CreatedAt
             };
         }

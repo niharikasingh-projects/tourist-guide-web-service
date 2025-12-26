@@ -28,6 +28,8 @@ namespace TouristGuide.Api.Models
         [StringLength(15)]
         public string? PhoneNumber { get; set; }
 
+        public DateTime? DateOfBirth { get; set; }
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public DateTime? UpdatedAt { get; set; }
