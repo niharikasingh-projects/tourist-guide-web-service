@@ -36,6 +36,10 @@ namespace TouristGuide.Api.DTOs
 
         [JsonPropertyName("customerContact")]
         public string TouristPhone { get; set; } = string.Empty;
+
+        public string PaymentStatus { get; set; } = string.Empty;
+
+        public string PaymentMethod { get; set; } = string.Empty;
         public string? SpecialRequests { get; set; }
         public DateTime CreatedAt { get; set; }
     }

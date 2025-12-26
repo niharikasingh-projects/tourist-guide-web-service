@@ -6,5 +6,6 @@ namespace TouristGuide.Api.Services
     {
         Task<PaymentDto> ProcessPaymentAsync(ProcessPaymentDto dto);
         Task<PaymentDto?> GetPaymentByBookingIdAsync(int bookingId);
+        Task<bool> UpdatePaymentStatusAsync(int bookingId, string status);
     }
 }
