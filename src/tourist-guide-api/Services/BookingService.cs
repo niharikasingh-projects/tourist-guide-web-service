@@ -200,7 +200,7 @@ namespace TouristGuide.Api.Services
             if (booking == null) return null;
 
             // Verify the user owns this booking
-            if (booking.UserId != userId)
+            if (booking.UserId != userId && booking.GuideId != userId)
             {
                 throw new UnauthorizedAccessException("You can only cancel your own bookings");
             }

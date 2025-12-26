@@ -165,12 +165,20 @@ BEGIN
         PaymentDate DATETIME2 NULL,
         CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
         CONSTRAINT FK_Payments_Bookings FOREIGN KEY (BookingId) REFERENCES Bookings(Id) ON DELETE CASCADE,
-        CONSTRAINT CK_Payments_Status CHECK (Status IN ('pending', 'completed', 'failed')),
+        CONSTRAINT CK_Payments_Status CHECK (Status IN ('pending', 'completed', 'failed', 'refunded')),
         CONSTRAINT CK_Payments_Method CHECK (PaymentMethod IN ('UPI', 'CreditCard', 'PayLater'))
     );
     PRINT 'Table Payments created successfully.';
 END
 GO
+
+--ALTER TABLE Payments DROP CONSTRAINT CK_Payments_Status;
+--GO
+
+--ALTER TABLE Payments
+--ADD CONSTRAINT CK_Payments_Status
+--CHECK (Status IN ('pending', 'completed', 'failed', 'refunded'));
+--GO
 
 -- Create Indexes for Better Performance
 CREATE NONCLUSTERED INDEX IX_Users_Email ON Users(Email);
