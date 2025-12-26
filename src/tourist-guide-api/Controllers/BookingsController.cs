@@ -19,7 +19,7 @@ namespace TouristGuide.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "tourist")]
+        //[Authorize(Roles = "tourist")]
         public async Task<IActionResult> Create([FromBody] CreateBookingDto dto)
         {
             try
@@ -51,9 +51,9 @@ namespace TouristGuide.Api.Controllers
             return Ok(booking);
         }
 
-        [HttpGet("my-bookings")]
-        [Authorize(Roles = "tourist")]
-        public async Task<IActionResult> GetMyBookings()
+        [HttpGet("my-bookings/{id}")]
+        //[Authorize(Roles = "tourist")]
+        public async Task<IActionResult> GetMyBookings(int id)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var bookings = await _bookingService.GetUserBookingsAsync(userId);

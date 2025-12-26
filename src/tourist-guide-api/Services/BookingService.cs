@@ -16,6 +16,12 @@ namespace TouristGuide.Api.Services
 
         public async Task<BookingDto> CreateBookingAsync(int userId, CreateBookingDto dto)
         {
+            // Validate booking date
+            if (dto.BookingDate == default || dto.BookingDate.Year < 2000)
+            {
+                throw new Exception("Invalid booking date. Please provide a valid date.");
+            }
+
             var guide = await _context.GuideProfiles.FindAsync(dto.GuideId);
             if (guide == null)
             {
@@ -74,10 +80,13 @@ namespace TouristGuide.Api.Services
                     AttractionId = b.AttractionId,
                     AttractionName = b.Attraction.Name,
                     GuideName = b.Guide.FullName,
+                    GuideContact = b.Guide.PhoneNumber,
+                    GuideEmail = b.Guide.Email,
                     BookingDate = b.BookingDate,
+                    SelectedDate = b.BookingDate,
                     TimeFrom = b.TimeFrom,
                     TimeTo = b.TimeTo,
-                    NumberOfPeople = b.NumberOfPeople,
+                    //NumberOfPeople = b.NumberOfPeople,
                     TotalAmount = b.TotalAmount,
                     TaxAmount = b.TaxAmount,
                     GrandTotal = b.GrandTotal,
@@ -107,10 +116,13 @@ namespace TouristGuide.Api.Services
                     AttractionId = b.AttractionId,
                     AttractionName = b.Attraction.Name,
                     GuideName = b.Guide.FullName,
+                    GuideContact = b.Guide.PhoneNumber,
+                    GuideEmail = b.Guide.Email,
                     BookingDate = b.BookingDate,
+                    SelectedDate = b.BookingDate,
                     TimeFrom = b.TimeFrom,
                     TimeTo = b.TimeTo,
-                    NumberOfPeople = b.NumberOfPeople,
+                    //NumberOfPeople = b.NumberOfPeople,
                     TotalAmount = b.TotalAmount,
                     TaxAmount = b.TaxAmount,
                     GrandTotal = b.GrandTotal,
@@ -142,9 +154,12 @@ namespace TouristGuide.Api.Services
                 AttractionName = booking.Attraction.Name,
                 GuideName = booking.Guide.FullName,
                 BookingDate = booking.BookingDate,
+                SelectedDate = booking.BookingDate,
+                GuideContact = booking.Guide.PhoneNumber,
+                GuideEmail = booking.Guide.Email,
                 TimeFrom = booking.TimeFrom,
                 TimeTo = booking.TimeTo,
-                NumberOfPeople = booking.NumberOfPeople,
+                //NumberOfPeople = booking.NumberOfPeople,
                 TotalAmount = booking.TotalAmount,
                 TaxAmount = booking.TaxAmount,
                 GrandTotal = booking.GrandTotal,
@@ -175,15 +190,15 @@ namespace TouristGuide.Api.Services
             var allBookings = await GetGuideBookingsAsync(guideId);
 
             var current = allBookings.Where(b =>
-                b.BookingDate.Date == selectedDate.Date &&
+                (b.BookingDate).Date == selectedDate.Date &&
                 (b.Status == "confirmed" || b.Status == "pending"));
 
             var past = allBookings.Where(b =>
-                b.BookingDate.Date < selectedDate.Date ||
-                (b.BookingDate.Date == selectedDate.Date && b.Status == "completed"));
+                (b.BookingDate).Date < selectedDate.Date ||
+                ((b.BookingDate).Date == selectedDate.Date && b.Status == "completed"));
 
             var future = allBookings.Where(b =>
-                b.BookingDate.Date > selectedDate.Date &&
+                (b.BookingDate).Date > selectedDate.Date &&
                 (b.Status == "confirmed" || b.Status == "pending"));
 
             return (current, past, future);
