@@ -8,14 +8,22 @@ namespace TouristGuide.Api.Services
     public class BookingService : IBookingService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IPaymentService _paymentService;
 
-        public BookingService(ApplicationDbContext context)
+        public BookingService(ApplicationDbContext context, IPaymentService paymentService)
         {
             _context = context;
+            _paymentService = paymentService;
         }
 
         public async Task<BookingDto> CreateBookingAsync(int userId, CreateBookingDto dto)
         {
+            // Validate booking date
+            if (dto.BookingDate == default || dto.BookingDate.Year < DateTime.UtcNow.Year)
+            {
+                throw new Exception("Invalid booking date. Please provide a valid date.");
+            }
+
             var guide = await _context.GuideProfiles.FindAsync(dto.GuideId);
             if (guide == null)
             {
@@ -74,10 +82,13 @@ namespace TouristGuide.Api.Services
                     AttractionId = b.AttractionId,
                     AttractionName = b.Attraction.Name,
                     GuideName = b.Guide.FullName,
+                    GuideContact = b.Guide.PhoneNumber,
+                    GuideEmail = b.Guide.Email,
                     BookingDate = b.BookingDate,
+                    SelectedDate = b.BookingDate,
                     TimeFrom = b.TimeFrom,
                     TimeTo = b.TimeTo,
-                    NumberOfPeople = b.NumberOfPeople,
+                    //NumberOfPeople = b.NumberOfPeople,
                     TotalAmount = b.TotalAmount,
                     TaxAmount = b.TaxAmount,
                     GrandTotal = b.GrandTotal,
@@ -86,7 +97,9 @@ namespace TouristGuide.Api.Services
                     TouristEmail = b.TouristEmail,
                     TouristPhone = b.TouristPhone,
                     SpecialRequests = b.SpecialRequests,
-                    CreatedAt = b.CreatedAt
+                    CreatedAt = b.CreatedAt,
+                    PaymentMethod = b.Payment.PaymentMethod,
+                    PaymentStatus = b.Payment.Status,
                 })
                 .ToListAsync();
         }
@@ -96,6 +109,7 @@ namespace TouristGuide.Api.Services
             return await _context.Bookings
                 .Include(b => b.Guide)
                 .Include(b => b.Attraction)
+                .Include(b => b.Payment)
                 .Where(b => b.GuideId == guideId)
                 .OrderByDescending(b => b.BookingDate)
                 .ThenBy(b => b.TimeFrom)
@@ -107,10 +121,13 @@ namespace TouristGuide.Api.Services
                     AttractionId = b.AttractionId,
                     AttractionName = b.Attraction.Name,
                     GuideName = b.Guide.FullName,
+                    GuideContact = b.Guide.PhoneNumber,
+                    GuideEmail = b.Guide.Email,
                     BookingDate = b.BookingDate,
+                    SelectedDate = b.BookingDate,
                     TimeFrom = b.TimeFrom,
                     TimeTo = b.TimeTo,
-                    NumberOfPeople = b.NumberOfPeople,
+                    //NumberOfPeople = b.NumberOfPeople,
                     TotalAmount = b.TotalAmount,
                     TaxAmount = b.TaxAmount,
                     GrandTotal = b.GrandTotal,
@@ -119,7 +136,9 @@ namespace TouristGuide.Api.Services
                     TouristEmail = b.TouristEmail,
                     TouristPhone = b.TouristPhone,
                     SpecialRequests = b.SpecialRequests,
-                    CreatedAt = b.CreatedAt
+                    CreatedAt = b.CreatedAt,
+                    PaymentMethod = b.Payment.PaymentMethod,
+                    PaymentStatus = b.Payment.Status,
                 })
                 .ToListAsync();
         }
@@ -129,6 +148,7 @@ namespace TouristGuide.Api.Services
             var booking = await _context.Bookings
                 .Include(b => b.Guide)
                 .Include(b => b.Attraction)
+                .Include(b => b.Payment)
                 .FirstOrDefaultAsync(b => b.Id == id);
 
             if (booking == null) return null;
@@ -142,9 +162,12 @@ namespace TouristGuide.Api.Services
                 AttractionName = booking.Attraction.Name,
                 GuideName = booking.Guide.FullName,
                 BookingDate = booking.BookingDate,
+                SelectedDate = booking.BookingDate,
+                GuideContact = booking.Guide.PhoneNumber,
+                GuideEmail = booking.Guide.Email,
                 TimeFrom = booking.TimeFrom,
                 TimeTo = booking.TimeTo,
-                NumberOfPeople = booking.NumberOfPeople,
+                //NumberOfPeople = booking.NumberOfPeople,
                 TotalAmount = booking.TotalAmount,
                 TaxAmount = booking.TaxAmount,
                 GrandTotal = booking.GrandTotal,
@@ -153,6 +176,8 @@ namespace TouristGuide.Api.Services
                 TouristEmail = booking.TouristEmail,
                 TouristPhone = booking.TouristPhone,
                 SpecialRequests = booking.SpecialRequests,
+                PaymentMethod = booking.Payment.PaymentMethod,
+                PaymentStatus = booking.Payment.Status,
                 CreatedAt = booking.CreatedAt
             };
         }
@@ -169,21 +194,55 @@ namespace TouristGuide.Api.Services
             return await GetBookingByIdAsync(id);
         }
 
+        public async Task<BookingDto?> CancelBookingAsync(int id, int userId)
+        {
+            var booking = await _context.Bookings.FindAsync(id);
+            if (booking == null) return null;
+
+            // Verify the user owns this booking
+            if (booking.UserId != userId)
+            {
+                throw new UnauthorizedAccessException("You can only cancel your own bookings");
+            }
+
+            // Check if booking can be cancelled
+            if (booking.Status == "cancelled")
+            {
+                throw new Exception("Booking is already cancelled");
+            }
+
+            if (booking.Status == "completed")
+            {
+                throw new Exception("Cannot cancel a completed booking");
+            }
+
+            // Update booking status to cancelled
+            booking.Status = "cancelled";
+            booking.UpdatedAt = DateTime.UtcNow;
+
+            // Update payment status to refunded if payment exists
+            await _paymentService.UpdatePaymentStatusAsync(booking.Id, "refunded");
+
+            await _context.SaveChangesAsync();
+
+            return await GetBookingByIdAsync(id);
+        }
+
         public async Task<(IEnumerable<BookingDto> current, IEnumerable<BookingDto> past, IEnumerable<BookingDto> future)>
             CategorizeGuideBookingsAsync(int guideId, DateTime selectedDate)
         {
             var allBookings = await GetGuideBookingsAsync(guideId);
 
             var current = allBookings.Where(b =>
-                b.BookingDate.Date == selectedDate.Date &&
+                (b.BookingDate).Date == selectedDate.Date &&
                 (b.Status == "confirmed" || b.Status == "pending"));
 
             var past = allBookings.Where(b =>
-                b.BookingDate.Date < selectedDate.Date ||
-                (b.BookingDate.Date == selectedDate.Date && b.Status == "completed"));
+                (b.BookingDate).Date < selectedDate.Date ||
+                ((b.BookingDate).Date == selectedDate.Date && b.Status == "completed"));
 
             var future = allBookings.Where(b =>
-                b.BookingDate.Date > selectedDate.Date &&
+                (b.BookingDate).Date > selectedDate.Date &&
                 (b.Status == "confirmed" || b.Status == "pending"));
 
             return (current, past, future);

@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace TouristGuide.Api.DTOs
 {
@@ -10,17 +11,35 @@ namespace TouristGuide.Api.DTOs
         public int AttractionId { get; set; }
         public string AttractionName { get; set; } = string.Empty;
         public string GuideName { get; set; } = string.Empty;
+        public string GuideEmail { get; set; } = string.Empty;
+        public string GuideContact { get; set; } = string.Empty;
         public DateTime BookingDate { get; set; }
+        public DateTime SelectedDate { get; set; }
         public string TimeFrom { get; set; } = string.Empty;
         public string TimeTo { get; set; } = string.Empty;
-        public int NumberOfPeople { get; set; }
+        public int HoursBooked { get; set; }
+        
         public decimal TotalAmount { get; set; }
+
+        [JsonPropertyName("totalTax")]
         public decimal TaxAmount { get; set; }
+
+        [JsonPropertyName("amount")]
         public decimal GrandTotal { get; set; }
         public string Status { get; set; } = string.Empty;
+
+        [JsonPropertyName("customerName")]
         public string TouristName { get; set; } = string.Empty;
+
+        [JsonPropertyName("customerEmail")]
         public string TouristEmail { get; set; } = string.Empty;
+
+        [JsonPropertyName("customerContact")]
         public string TouristPhone { get; set; } = string.Empty;
+
+        public string PaymentStatus { get; set; } = string.Empty;
+
+        public string PaymentMethod { get; set; } = string.Empty;
         public string? SpecialRequests { get; set; }
         public DateTime CreatedAt { get; set; }
     }
@@ -34,6 +53,7 @@ namespace TouristGuide.Api.DTOs
         public int AttractionId { get; set; }
 
         [Required]
+        [JsonPropertyName("selectedDate")]
         public DateTime BookingDate { get; set; }
 
         [Required]
@@ -47,14 +67,17 @@ namespace TouristGuide.Api.DTOs
 
         [Required]
         [StringLength(100)]
+        [JsonPropertyName("customerName")]
         public string TouristName { get; set; } = string.Empty;
 
         [Required]
         [EmailAddress]
+        [JsonPropertyName("customerEmail")]
         public string TouristEmail { get; set; } = string.Empty;
 
         [Required]
         [StringLength(15)]
+        [JsonPropertyName("customerContact")]
         public string TouristPhone { get; set; } = string.Empty;
 
         public string? SpecialRequests { get; set; }

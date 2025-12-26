@@ -32,12 +32,12 @@ namespace TouristGuide.Api.Services
             }
 
             // Validate payment method specific details
-            if (dto.PaymentMethod == "UPI" && string.IsNullOrEmpty(dto.UpiId))
+            if (string.Equals(dto.PaymentMethod, "UPI", StringComparison.InvariantCultureIgnoreCase) && string.IsNullOrEmpty(dto.UpiId))
             {
                 throw new Exception("UPI ID is required for UPI payment");
             }
 
-            if (dto.PaymentMethod == "CreditCard")
+            if (string.Equals(dto.PaymentMethod, "CreditCard", StringComparison.InvariantCultureIgnoreCase))
             {
                 if (string.IsNullOrEmpty(dto.CardNumber) || string.IsNullOrEmpty(dto.CardHolderName))
                 {
@@ -63,22 +63,25 @@ namespace TouristGuide.Api.Services
                 Amount = booking.GrandTotal,
                 PaymentMethod = dto.PaymentMethod,
                 TransactionId = Guid.NewGuid().ToString().Substring(0, 20),
-                Status = dto.PaymentMethod == "PayLater" ? "pending" : "completed",
+                Status = string.Equals(dto.PaymentMethod, "PayLater", StringComparison.InvariantCultureIgnoreCase) ? "pending" : "completed",
                 UpiId = dto.UpiId,
                 CardNumber = dto.CardNumber != null ? "****" + dto.CardNumber.Substring(Math.Max(0, dto.CardNumber.Length - 4)) : null,
                 CardHolderName = dto.CardHolderName,
-                PaymentDate = dto.PaymentMethod != "PayLater" ? DateTime.UtcNow : (DateTime?)null,
+                PaymentDate = !string.Equals(dto.PaymentMethod, "PayLater", StringComparison.InvariantCultureIgnoreCase) ? DateTime.UtcNow : (DateTime?)null,
                 CreatedAt = DateTime.UtcNow
             };
 
             _context.Payments.Add(payment);
 
-            // Update booking status
-            if (dto.PaymentMethod != "PayLater")
-            {
-                booking.Status = "confirmed";
-                booking.UpdatedAt = DateTime.UtcNow;
-            }
+            //// Update booking status
+            //if (dto.PaymentMethod != "PayLater")
+            //{
+            //    booking.Status = "confirmed";
+            //    booking.UpdatedAt = DateTime.UtcNow;
+            //}
+
+            booking.Status = "confirmed";
+            booking.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
 
@@ -111,6 +114,19 @@ namespace TouristGuide.Api.Services
                 Status = payment.Status,
                 PaymentDate = payment.PaymentDate
             };
+        }
+
+        public async Task<bool> UpdatePaymentStatusAsync(int bookingId, string status)
+        {
+            var payment = await _context.Payments
+                .FirstOrDefaultAsync(p => p.BookingId == bookingId);
+
+            if (payment == null) return false;
+
+            payment.Status = status;
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

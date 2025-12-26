@@ -19,7 +19,7 @@ namespace TouristGuide.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize(Roles = "tourist")]
+        //[Authorize(Roles = "tourist")]
         public async Task<IActionResult> Create([FromBody] CreateBookingDto dto)
         {
             try
@@ -51,18 +51,18 @@ namespace TouristGuide.Api.Controllers
             return Ok(booking);
         }
 
-        [HttpGet("my-bookings")]
-        [Authorize(Roles = "tourist")]
-        public async Task<IActionResult> GetMyBookings()
+        [HttpGet("my-bookings/{id}")]
+        //[Authorize(Roles = "tourist")]
+        public async Task<IActionResult> GetMyBookings(int id)
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
             var bookings = await _bookingService.GetUserBookingsAsync(userId);
             return Ok(bookings);
         }
 
-        [HttpGet("guide-bookings")]
+        [HttpGet("guide-bookings/{guideId}")]
         [Authorize(Roles = "guide")]
-        public async Task<IActionResult> GetGuideBookings([FromQuery] int guideId)
+        public async Task<IActionResult> GetGuideBookings(int guideId)
         {
             var bookings = await _bookingService.GetGuideBookingsAsync(guideId);
             return Ok(bookings);
@@ -91,6 +91,29 @@ namespace TouristGuide.Api.Controllers
                     return NotFound(new { message = "Booking not found" });
 
                 return Ok(booking);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}/cancel")]
+        public async Task<IActionResult> CancelBooking(int id)
+        {
+            try
+            {
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+                var booking = await _bookingService.CancelBookingAsync(id, userId);
+                
+                if (booking == null)
+                    return NotFound(new { message = "Booking not found" });
+
+                return Ok(new { message = "Booking cancelled successfully and payment refunded", booking });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid();
             }
             catch (Exception ex)
             {
