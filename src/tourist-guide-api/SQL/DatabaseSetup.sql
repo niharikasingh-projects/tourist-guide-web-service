@@ -28,6 +28,7 @@ BEGIN
         PasswordHash NVARCHAR(255) NOT NULL,
         Role NVARCHAR(20) NOT NULL DEFAULT 'tourist',
         PhoneNumber NVARCHAR(15) NULL,
+        DateOfBirth DATETIME2 NULL,
         CreatedAt DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
         UpdatedAt DATETIME2 NULL,
         CONSTRAINT CK_Users_Role CHECK (Role IN ('tourist', 'guide', 'admin'))

@@ -68,6 +68,7 @@ builder.Services.Configure<FormOptions>(options =>
 
 // Register Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAttractionService, AttractionService>();
 builder.Services.AddScoped<IGuideService, GuideService>();
 builder.Services.AddScoped<IBookingService, BookingService>();
